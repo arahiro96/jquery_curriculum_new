@@ -57,12 +57,14 @@
           });
         });
         function slide_down($list) {
-          $list.find('.menu__list__childList').stop()
-                                              .slideDown();                                       
+          $list.children('.menu__list__childList')
+               .stop()
+               .slideDown();                                       
         }
-        
+
         function slide_up($list) {
-          $list.find('.menu__list__childList').stop()
+          $list.children('.menu__list__childList')
+               .stop()
                                               .slideUp(); 
         }
     </script>
