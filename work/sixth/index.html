@@ -29,8 +29,6 @@
     <script src="./js/appid.js"></script>
     <script>
       $(function() {
-        var page = 1;
-        var keyword = $('.search__text__input').val();
         $('[data-js="search-btn"]').on('click', function(){
           remove_list();
           view_page();
@@ -53,6 +51,7 @@
         });
           function view_page() {
             var keyword = $('.search__text__input').val();
+            var page = 1;
             $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
             type: 'GET',
@@ -66,8 +65,6 @@
               status: 0
             }
           }).done(function(data) {
-            console.log(data.Items);
-            
             if(data.hits === 0) {
               $('.message').html('<p>検索結果が見つかりませんでした。別のキーワードで検索して下さい。</p>');
               return;
