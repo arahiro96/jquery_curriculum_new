@@ -34,6 +34,7 @@
         var page = 1;
         $('[data-js="search-btn"]').on('click', function(){
           keyword = $('.search__text__input').val();
+          page = 1;
           remove_list();
           view_page();
         });
@@ -67,26 +68,25 @@
               booksGenreId: '001',
               hits: '20',
               page: page,
-              status: 0
             }
           }).done(function(data) {
             if(data.hits === 0) {
-              $('.message').html('<p>検索結果が見つかりませんでした。別のキーワードで検索して下さい。</p>');
+              $('.message').html('<p class="message">検索結果が見つかりませんでした。別のキーワードで検索して下さい。</p>');
               return;
             }
             show_items(data);
             show_pager(data);
             if(data.page === 1) {
               $('[data-js="page-prev"]').addClass('disabled');
-            }
+            } 
             if(data.page === data.pageCount) {
               $('[data-js="page-next"]').addClass('disabled');
             }
-          }).fail(function(jqXHR, textStatus, errorThrown) {
+          }).fail(function(jqXHR) {
             if(jqXHR.status === 0) {
               $('.message').html('<p class="message">通信に失敗しました。インターネット接続をご確認下さい。</p>');
             } else if(jqXHR.status === 400) {
-              $('.message').html('<p>検索文字が入力されていません。</p>');
+              $('.message').html('<p class="message">検索文字が入力されていません。</p>');
             }else if(jqXHR.status === 429) {
               $('.message').html('<p class="message">リクエスト過多です。しばらく時間を置いてからお試しください。</p>');
             }
@@ -113,7 +113,6 @@
             });
             $('.lists').append(list);
           }
-
           function show_pager(data) {
             var pager =
               '<div class="pager" data-js="pager">'
