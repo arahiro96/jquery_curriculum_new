@@ -28,30 +28,35 @@
     <script src="../../common/js/jquery.js"></script>
     <script src="./js/appid.js"></script>
     <script>
+        
       $(function() {
+        var keyword = '';
+        var page = 1;
         $('[data-js="search-btn"]').on('click', function(){
+          keyword = $('.search__text__input').val();
           remove_list();
           view_page();
         });
         $(document).on('click','[data-js="page-next"]',function(e) {
           e.preventDefault();
-          if(!$(this).hasClass('disabled')) {
+          if($(this).hasClass('disabled')) {
+            return false;
+          }
           page++;
           remove_list();
           view_page();
-          }
         });
         $(document).on('click','[data-js="page-prev"]',function(e) {
           e.preventDefault();
-          if(!$(this).hasClass('disabled')) {
+          if($(this).hasClass('disabled')) {
+            return false;
+          }
           page--;
           remove_list();
           view_page();
-          }
         });
+
           function view_page() {
-            var keyword = $('.search__text__input').val();
-            var page = 1;
             $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
             type: 'GET',
@@ -69,17 +74,47 @@
               $('.message').html('<p>検索結果が見つかりませんでした。別のキーワードで検索して下さい。</p>');
               return;
             }
+            show_items(data);
+            show_pager(data);
+            if(data.page === 1) {
+              $('[data-js="page-prev"]').addClass('disabled');
+            }
+            if(data.page === data.pageCount) {
+              $('[data-js="page-next"]').addClass('disabled');
+            }
+          }).fail(function(jqXHR, textStatus, errorThrown) {
+            if(jqXHR.status === 0) {
+              $('.message').html('<p class="message">通信に失敗しました。インターネット接続をご確認下さい。</p>');
+            } else if(jqXHR.status === 400) {
+              $('.message').html('<p>検索文字が入力されていません。</p>');
+            }else if(jqXHR.status === 429) {
+              $('.message').html('<p class="message">リクエスト過多です。しばらく時間を置いてからお試しください。</p>');
+            }
+          })
+          }
+
+          function remove_list() {
+            $('.lists').empty();
+            $('.pager').remove();
+            $('.message').empty();
+          }
+
+          function show_items(data) {
+            var list = '';
             $.each(data.Items,function(i,item){
-              var list = $("<li class='lists__item'>" +
-              "<div class='lists__item__inner'>" +
-              "<a href='" + item.Item.itemUrl + "'class='lists__item__link' target='_blank'>" +
-              "<img src='" + item.Item.mediumImageUrl +"' class='lists__item__img' alt>" +
-              "<p class='lists__item__detail'>作品名： " + item.Item.title + '</p>' +
-              "<p class='lists__item__detail'>作者  ： " + item.Item.author + '</p>' +
-              "<p class='lists__item__detail'>出版社： " + item.Item.publisherName + '</p>' + '<a>'+
-              '</div>' + '</li>');
-              $('ul').append(list);
+              list +=  '<li class="lists__item">' +
+              '<div class="lists__item__inner">' +
+              '<a href="' + item.Item.itemUrl + '"class="lists__item__link" target="_blank">' +
+              '<img src="' + item.Item.mediumImageUrl +'" class="lists__item__img" alt>' +
+              '<p class="lists__item__detail">作品名： ' + item.Item.title + '</p>' +
+              '<p class="lists__item__detail">作者  ： ' + item.Item.author + '</p>' +
+              '<p class="lists__item__detail">出版社： ' + item.Item.publisherName + '</p><a>'+
+              '</div></li>';
             });
+            $('.lists').append(list);
+          }
+
+          function show_pager(data) {
             var pager =
               '<div class="pager" data-js="pager">'
               +'<div class="counter">'
@@ -91,26 +126,6 @@
               +'</div>'
               +'</div>'
             $('.lists').after(pager);
-            if(data.page === 1) {
-              $('[data-js="page-prev"]').addClass('disabled');
-            }
-            if(data.page === data.pageCount) {
-              $('[data-js="page-next"]').addClass('disabled');
-            }
-          }).fail(function(jqXHR, textStatus, errorThrown) {
-            if(errorThrown === "") {
-              $('.message').html('<p class="message">通信に失敗しました。インターネット接続をご確認下さい。</p>');
-            } else if(errorThrown === "400") {
-              $('.message').html('<p>検索文字が入力されていません。</p>');
-            }else if(errorThrown === "429") {
-              $('.message').html('<p class="message">リクエスト過多です。しばらく時間を置いてからお試しください。</p>');
-            }
-          })
-          }
-          function remove_list() {
-            $('.lists').empty();
-            $('.pager').remove();
-            $('.message').empty();
           }
       });
     </script>
